@@ -26,7 +26,7 @@ public class ClientThread extends Thread{
 			
 			while ((fromServer = in.readLine()) != null) {
 				System.out.println("Server - " + fromServer);
-				sleep(15);
+				sleep(5000);
 				if (fromServer.equals("exit"))
 					break;
 				if (fromServer.startsWith("inserted,")){
@@ -57,7 +57,8 @@ public class ClientThread extends Thread{
 						double randclient = Math.random();
 						double d2 = randclient * client_id;
 						int new_friend = (int)d2;
-						fromUser ="insertfriendship," + client_id + "," + Integer.toString(new_friend);
+						if (client_id > 0)
+							fromUser ="insertfriendship," + client_id + "," + Integer.toString(new_friend);
 					}
 					
 					if (fromUser != null) {

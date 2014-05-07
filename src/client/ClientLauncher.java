@@ -2,12 +2,13 @@ package client;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
  
 public class ClientLauncher {
 	public static void main(String[] args) throws IOException, InterruptedException {
 	
-		int clientes = 2;
+		int clientes = 10;
 		Set<ClientThread> ClientThreads = new HashSet<ClientThread>();
 		
 		for(int i=1; i<=clientes; i++){
@@ -15,6 +16,7 @@ public class ClientLauncher {
 			cliente.setName(Integer.toString(i));
 			new Thread(cliente).start();
 			ClientThreads.add((ClientThread) cliente);
+			TimeUnit.SECONDS.sleep(5);
 		}
 	}
 }
