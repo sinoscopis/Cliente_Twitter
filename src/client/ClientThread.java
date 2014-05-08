@@ -4,6 +4,9 @@ import java.io.*;
 import java.net.*;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.StringTokenizer;
+
+import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
  
 public class ClientThread extends Thread{
 
@@ -42,6 +45,35 @@ public class ClientThread extends Thread{
 						}
 					}
 				}
+				if (fromServer.startsWith("Tweets [")){
+					Hashtable twts=new Hashtable();
+		            StringTokenizer tokens=new StringTokenizer(fromServer, "(|)");
+		            int i=0;
+		            while(tokens.hasMoreTokens()){
+		                String a = tokens.nextToken();
+		                try  
+		                  {  
+		                     if(Integer.parseInt(a)>0){
+		                    	 i++;
+		                    	 twts.put(i, Integer.parseInt(a));
+		                     }
+		                  }  
+		                  catch(NumberFormatException nfe)  
+		                  {  
+		                  }
+		            }
+
+					double rd = Math.random();
+					double d2 = rd * i;
+					int rand_tweet = (int)d2 +1;
+					fromUser = "retweet,"+ client_id +","+twts.get(rand_tweet);
+					if (fromUser != null) {
+						System.out.println("Client - " + fromUser);
+						synchronized (socket){
+							out.println(fromUser);
+						}
+					}
+				}
 				else {
 					
 					double randNumber = Math.random();
@@ -57,7 +89,7 @@ public class ClientThread extends Thread{
 						double randclient = Math.random();
 						double d2 = randclient * client_id;
 						int new_friend = (int)d2;
-						if (client_id > 0)
+						if (new_friend > 0)
 							fromUser ="insertfriendship," + client_id + "," + Integer.toString(new_friend);
 					}
 					
