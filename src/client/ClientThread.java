@@ -10,6 +10,7 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
  
 public class ClientThread extends Thread{
 
+	private final static Object lock = new Object();
 	public void run() {
 		Socket socket = null;
 		PrintWriter out = null;
@@ -36,6 +37,18 @@ public class ClientThread extends Thread{
 					String[] peticion = fromServer.split(",", 2);
 					client_id = Integer.parseInt(peticion[1]);
 				}
+				try {
+					Integer.parseInt(fromServer);
+					double randclient = Math.random();
+					double d2 = randclient * Integer.parseInt(fromServer);
+					int new_friend = (int)d2;
+					if (new_friend > 0)
+						fromUser ="insertfriendship," + client_id + "," + Integer.toString(new_friend);
+					System.out.println("Client - " + fromUser);
+					out.println(fromUser);
+					}
+				catch (Exception e){
+				}
 				if (fromServer.startsWith("......")){
 					fromUser = "insertuser,"+randomIdentifier(15);
 					if (fromUser != null) {
@@ -45,58 +58,75 @@ public class ClientThread extends Thread{
 						}
 					}
 				}
-				if (fromServer.startsWith("Tweets [")){
-					Hashtable twts=new Hashtable();
-		            StringTokenizer tokens=new StringTokenizer(fromServer, "(|)");
-		            int i=0;
-		            while(tokens.hasMoreTokens()){
-		                String a = tokens.nextToken();
-		                try  
-		                  {  
-		                     if(Integer.parseInt(a)>0){
-		                    	 i++;
-		                    	 twts.put(i, Integer.parseInt(a));
-		                     }
-		                  }  
-		                  catch(NumberFormatException nfe)  
-		                  {  
-		                  }
-		            }
-
-					double rd = Math.random();
-					double d2 = rd * i;
-					int rand_tweet = (int)d2 +1;
-					fromUser = "retweet,"+ client_id +","+twts.get(rand_tweet);
-					if (fromUser != null) {
-						System.out.println("Client - " + fromUser);
-						synchronized (socket){
-							out.println(fromUser);
+				else {
+					if (fromServer.startsWith("ReTweet")){
+						String retweet=null;
+			            StringTokenizer tokens=new StringTokenizer(fromServer, "(|)");
+			            while(tokens.hasMoreTokens()){
+			            	String a = tokens.nextToken();
+			                try  
+			                  {  
+			                     if(a.startsWith("http")){
+			                    	 retweet = a;
+			                     }
+			                  }  
+			                  catch(NumberFormatException nfe)  
+			                  {  
+			                  }
+			            }
+			            synchronized (lock) {
+			            	ClientLauncher.content = retweet;
+			            }
+					}
+					else if (fromServer.startsWith("Tweets [")){
+						Hashtable twts=new Hashtable();
+			            StringTokenizer tokens=new StringTokenizer(fromServer, "(|)");
+			            int i=0;
+			            while(tokens.hasMoreTokens()){
+			                String a = tokens.nextToken();
+			                try  
+			                  {  
+			                     if(Integer.parseInt(a)>0){
+			                    	 i++;
+			                    	 twts.put(i, Integer.parseInt(a));
+			                     }
+			                  }  
+			                  catch(NumberFormatException nfe)  
+			                  {  
+			                  }
+			            }
+	
+						double rd = Math.random();
+						double d2 = rd * i;
+						int rand_tweet = (int)d2 +1;
+						fromUser = "retweet,"+ client_id +","+twts.get(rand_tweet);
+						if (fromUser != null) {
+							System.out.println("Client - " + fromUser);
+							synchronized (socket){
+								out.println(fromUser);
+							}
 						}
 					}
-				}
-				else {
-					
-					double randNumber = Math.random();
-					double d1 = randNumber * 100;
-					int range = (int)d1;
-					if (range>=1 && range <60){
-						fromUser ="friendstweets,"+ client_id;
-					}
-					else if (range>=60 && range <90){
-						fromUser ="insertrandomtweet,"+ client_id;
-					}
 					else {
-						double randclient = Math.random();
-						double d2 = randclient * client_id;
-						int new_friend = (int)d2;
-						if (new_friend > 0)
-							fromUser ="insertfriendship," + client_id + "," + Integer.toString(new_friend);
+						
+						double randNumber = Math.random();
+						double d1 = randNumber * 100;
+						int range = (int)d1;
+						if (range>=1 && range <60){
+							fromUser ="friendstweets,"+ client_id;
+						}
+						else if (range>=60 && range <90){
+							fromUser ="insertrandomtweet,"+ client_id;
+						}
+						else {
+							fromUser ="countusers";
+						}
+						
+						if (fromUser != null) {
+							System.out.println("Client - " + fromUser);
+							out.println(fromUser);
+						}								
 					}
-					
-					if (fromUser != null) {
-						System.out.println("Client - " + fromUser);
-						out.println(fromUser);
-					}								
 				}
 			}
 		} catch (UnknownHostException e) {
