@@ -48,6 +48,7 @@ public class ClientThread extends Thread{
 					out.println(fromUser);
 					}
 				catch (Exception e){
+					e.printStackTrace();
 				}
 				if (fromServer.startsWith("......")){
 					fromUser = "insertuser,"+randomIdentifier(15);
@@ -70,13 +71,20 @@ public class ClientThread extends Thread{
 			                    	 retweet = a;
 			                     }
 			                  }  
-			                  catch(NumberFormatException nfe)  
+			                
+			                  catch(Exception nfe)  
 			                  {  
-			                  }
+			                	  	//nfe.printStackTrace();
+			                  }	
 			            }
-			            synchronized (lock) {
-			            	ClientLauncher.content = retweet;
+			            if (retweet!=null){
+				            synchronized (lock) {
+				            	ClientLauncher.content = retweet;
+				            	ClientLauncher.onContentChanged();
+				            }
 			            }
+			            fromUser ="Retweet analizado";
+			            out.println(fromUser);
 					}
 					else if (fromServer.startsWith("Tweets [")){
 						Hashtable twts=new Hashtable();
@@ -108,7 +116,6 @@ public class ClientThread extends Thread{
 						}
 					}
 					else {
-						
 						double randNumber = Math.random();
 						double d1 = randNumber * 100;
 						int range = (int)d1;
@@ -144,7 +151,7 @@ public class ClientThread extends Thread{
 				out.close();
 				in.close();
 				socket.close();
-			} catch (IOException e) {
+			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
