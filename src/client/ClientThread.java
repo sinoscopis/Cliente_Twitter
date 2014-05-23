@@ -48,7 +48,7 @@ public class ClientThread extends Thread{
 					out.println(fromUser);
 					}
 				catch (Exception e){
-					e.printStackTrace();
+					//e.printStackTrace();
 				}
 				if (fromServer.startsWith("......")){
 					fromUser = "insertuser,"+randomIdentifier(15);
