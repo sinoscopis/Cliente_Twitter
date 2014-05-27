@@ -64,6 +64,52 @@ public class ClientThread extends Thread{
 			            fromUser ="Retweet analizado";
 			            out.println(fromUser);
 					}
+					else if(fromServer.startsWith("Consumir -")){
+						//Analizo si es URL
+						String consumir=null;
+						int id_retweet=0;
+				        StringTokenizer tokens2=new StringTokenizer(fromServer, "(|)");
+				        while(tokens2.hasMoreTokens()){
+				        	String a = tokens2.nextToken();
+				            try  
+				              {  
+				                 if(a.startsWith("http")){
+				                	 consumir = a;
+				                 }
+				                 if(Integer.parseInt(a)>0){
+				                	 id_retweet=Integer.parseInt(a);
+			                     }
+				              }  
+				            
+				              catch(Exception nfe)  
+				              {  
+				            	  	//nfe.printStackTrace();
+				              }	
+				        }
+				        if (consumir!=null){
+				            synchronized (lock) {
+				            	consumirContenido(consumir);
+				            }
+				        }
+				      //anado probabilidad para que lo retweetee
+						double randNumber2 = Math.random();
+						double d3 = randNumber2 * 100;
+						int range2 = (int)d3;
+						if (range2>=1 && range2 <80){
+							//retweet
+							fromUser = "retweet,"+ client_id +","+id_retweet;
+						}
+						else {
+							// no retweet
+							fromUser = "No retweeteo";
+						}
+						if (fromUser != null) {
+							System.out.println("Client - " + fromUser);
+							synchronized (socket){
+								out.println(fromUser);
+							}
+						}
+					}
 					else if (fromServer.startsWith("Tweets [")){
 						Hashtable twts=new Hashtable();
 			            StringTokenizer tokens=new StringTokenizer(fromServer, "(|)");
@@ -83,9 +129,9 @@ public class ClientThread extends Thread{
 			                  }
 			            }
 			            //Select random twit
-						double rd = Math.random();
-						double d2 = rd * i;
-						int rand_tweet = (int)d2 +1;
+						double rt = Math.random();
+						double drt = rt * i;
+						int rand_tweet = (int)drt +1;
 						
 						//Anado probabilidad de consumir el twit 50 50
 						double randNumber = Math.random();
@@ -93,42 +139,8 @@ public class ClientThread extends Thread{
 						int range = (int)d1;
 						if (range>=1 && range <50){
 							//CONSUME el Twit
-							
-							//Analizo si es URL
-							String consumir=null;
-				            StringTokenizer tokens2=new StringTokenizer(fromServer, "(|)");
-				            while(tokens2.hasMoreTokens()){
-				            	String a = tokens2.nextToken();
-				                try  
-				                  {  
-				                     if(a.startsWith("http")){
-				                    	 consumir = a;
-				                     }
-				                  }  
-				                
-				                  catch(Exception nfe)  
-				                  {  
-				                	  	//nfe.printStackTrace();
-				                  }	
-				            }
-				            if (consumir!=null){
-					            synchronized (lock) {
-					            	consumirContenido(consumir);
-					            }
-				            }
-				            
-							//anado probabilidad para que lo retweetee
-							double randNumber2 = Math.random();
-							double d3 = randNumber2 * 100;
-							int range2 = (int)d3;
-							if (range2>=1 && range2 <80){
-								//retweet
-								fromUser = "retweet,"+ client_id +","+twts.get(rand_tweet);
-							}
-							else {
-								// no retweet
-								fromUser = "No retweeteo";
-							}
+							fromUser = "Consumo,"+twts.get(rand_tweet);
+
 						}
 						else {
 							//No consume el twit
@@ -192,57 +204,68 @@ public class ClientThread extends Thread{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
 		}
 	}
 
-	
 	private void consumirContenido(String consumir) {
-		Socket cache_socket = null;
-		PrintWriter cache_out = null;
-		BufferedReader cache_in = null;
-		InetAddress host = null;
+		Socket ClientSoc = null;
+
+		DataInputStream din;
+		DataOutputStream dout;
+		//BufferedReader br;
+		try{
 		
-		try {
-			host = InetAddress.getLocalHost();
-			cache_socket = new Socket(host.getHostName(), 66666);
- 
-			cache_out = new PrintWriter(cache_socket.getOutputStream(), true);
-			cache_in = new BufferedReader(new InputStreamReader(cache_socket.getInputStream()));
- 
-			String cache_fromServer;
-			String cache_fromUser = null;
+			InetAddress host = InetAddress.getLocalHost();
+			ClientSoc = new Socket(host.getHostName(), 60000);
 			
-			while ((cache_fromServer = cache_in.readLine()) != null) {
-				System.out.println("cache_Server - " + cache_fromServer);
-				if (cache_fromServer.equals("exit"))
-					break;
-				cache_fromUser = "Consumir,"+consumir;
-				if (cache_fromUser != null) {
-					System.out.println("cache_Client - " + cache_fromUser);
-					cache_out.println(cache_fromUser);
-				}
-			}
-		} catch (UnknownHostException e) {
-			System.err.println("Cannot find the host: " + host.getHostName());
-			System.exit(1);
-		} catch (IOException e) {
-			System.out.println("Couldn't read/write from the connection: " +e.toString() );
-			e.printStackTrace();
-			System.exit(1);
-		} finally { //Make sure we always clean up	
-			try {
-				cache_out.close();
-				cache_in.close();
-				cache_socket.close();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			din=new DataInputStream(ClientSoc.getInputStream());
+			dout=new DataOutputStream(ClientSoc.getOutputStream());
+			//br=new BufferedReader(new InputStreamReader(System.in));
+			
+			dout.writeUTF("GET");
+			ReceiveFile(din,dout,consumir);
+		}
+		catch(Exception ex){
+			
 		}
 	}
 
-
+	public static void ReceiveFile(DataInputStream din, DataOutputStream dout, String consumir) throws Exception{
+		String filename = consumir.substring(17);
+		String file_path = "C:\\Users\\Alberto\\workspace\\Client_Twitter\\Client_content\\"+filename;
+		dout.writeUTF(filename);
+		String msgFromCacheServer=din.readUTF();
+		
+		if(msgFromCacheServer.compareTo("File Not Found")==0)
+		{
+			System.out.println("File not found on cache waiting for cache to found it ...");
+		}
+		else if(msgFromCacheServer.compareTo("READY")==0)
+		{
+			System.out.println("Receiving File ...");
+			File f=new File(file_path);
+			if(f.exists())
+			{
+				dout.flush();
+				return;					
+			}
+			FileOutputStream fout=new FileOutputStream(f);
+			int ch;
+			String temp;
+			do
+			{
+				temp=din.readUTF();
+				ch=Integer.parseInt(temp);
+				if(ch!=-1)
+				{
+					fout.write(ch);					
+				}
+			}while(ch!=-1);
+			fout.close();
+			System.out.println(din.readUTF());
+		}
+	}
+	
 	public static String randomIdentifier(int max_length) {
 		final String lexicon = "ABCDEFGHIJKLMNOPQRSTUVWXYZ12345674890";
 		final java.util.Random rand = new java.util.Random();
