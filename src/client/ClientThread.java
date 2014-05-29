@@ -30,7 +30,7 @@ public class ClientThread extends Thread{
 			
 			while ((fromServer = in.readLine()) != null) {
 				System.out.println("Server - " + fromServer);
-				sleep(5000);
+				sleep(1000);
 				if (fromServer.equals("exit"))
 					break;
 				if (fromServer.startsWith("inserted,")){
@@ -193,7 +193,6 @@ public class ClientThread extends Thread{
 			e.printStackTrace();
 			System.exit(1);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally { //Make sure we always clean up	
 			try {
@@ -201,7 +200,6 @@ public class ClientThread extends Thread{
 				in.close();
 				socket.close();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -212,7 +210,6 @@ public class ClientThread extends Thread{
 
 		DataInputStream din;
 		DataOutputStream dout;
-		//BufferedReader br;
 		try{
 		
 			InetAddress host = InetAddress.getLocalHost();
@@ -220,9 +217,7 @@ public class ClientThread extends Thread{
 			
 			din=new DataInputStream(ClientSoc.getInputStream());
 			dout=new DataOutputStream(ClientSoc.getOutputStream());
-			//br=new BufferedReader(new InputStreamReader(System.in));
 			
-			dout.writeUTF("GET");
 			ReceiveFile(din,dout,consumir);
 		}
 		catch(Exception ex){
@@ -231,6 +226,7 @@ public class ClientThread extends Thread{
 	}
 
 	public static void ReceiveFile(DataInputStream din, DataOutputStream dout, String consumir) throws Exception{
+		dout.writeUTF("GET");
 		String filename = consumir.substring(17);
 		String file_path = "C:\\Users\\Alberto\\workspace\\Client_Twitter\\Client_content\\"+filename;
 		dout.writeUTF(filename);
