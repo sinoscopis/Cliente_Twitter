@@ -15,11 +15,11 @@ public class ClientLauncher {
 		    	clientes = Integer.parseInt(args[0]);
 		    	ClientThread.host = args[1];
 		    } catch (Exception e) {
-		        System.err.println("ClientLauncher.jar number_of_clients Server_IP");
+		        System.err.println("ClientLauncher.jar number_of_clients Cache_IP");
 		    }
 		}
 		else{
-			System.err.println("ClientLauncher.jar number_of_clients Server_IP");
+			System.err.println("ClientLauncher.jar number_of_clients Cache_IP");
 			System.exit(1);
 		}
 	
