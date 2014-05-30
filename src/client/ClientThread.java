@@ -229,7 +229,14 @@ public class ClientThread extends Thread{
 	public static void ReceiveFile(DataInputStream din, DataOutputStream dout, String consumir) throws Exception{
 		dout.writeUTF("GET");
 		String filename = consumir.substring(17);
-		String file_path = "C:\\Users\\Alberto\\workspace\\Client_Twitter\\Client_content\\"+filename;
+		String sSistemaOperativo = System.getProperty("os.name");
+		String file_path = null;
+		if(sSistemaOperativo.startsWith("Win")){
+			file_path = ".\\Client_Content\\"+filename;
+		}
+		else {
+			file_path = "./Client_Content/"+filename;
+		}
 		dout.writeUTF(filename);
 		String msgFromCacheServer=din.readUTF();
 		
