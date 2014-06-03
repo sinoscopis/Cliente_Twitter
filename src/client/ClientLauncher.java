@@ -13,13 +13,14 @@ public class ClientLauncher {
 		if (args.length > 0) {
 		    try {
 		    	clientes = Integer.parseInt(args[0]);
-		    	ClientThread.host = args[1];
+		    	ClientThread.Server_host = args[1];
+		    	ClientThread.Cache_host = args[2];
 		    } catch (Exception e) {
-		        System.err.println("ClientLauncher.jar number_of_clients Cache_IP");
+		        System.err.println("ClientLauncher.jar number_of_clients Server_IP Cache_IP");
 		    }
 		}
 		else{
-			System.err.println("ClientLauncher.jar number_of_clients Cache_IP");
+			System.err.println("ClientLauncher.jar number_of_clients Server_IP Cache_IP");
 			System.exit(1);
 		}
 	

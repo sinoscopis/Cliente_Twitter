@@ -10,7 +10,8 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
  
 public class ClientThread extends Thread{
 
-	static String host;
+	static String Server_host;
+	static String Cache_host;
 	
 	private final static Object lock = new Object();
 	public void run() {
@@ -21,7 +22,7 @@ public class ClientThread extends Thread{
 		int client_id = 0;
 		
 		try {
-			socket = new Socket(host, 55555);
+			socket = new Socket(Server_host, 55555);
  
 			out = new PrintWriter(socket.getOutputStream(), true);
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -187,7 +188,7 @@ public class ClientThread extends Thread{
 				}
 			}
 		} catch (UnknownHostException e) {
-			System.err.println("Cannot find the host: " + host);
+			System.err.println("Cannot find the host: " + Server_host);
 			System.exit(1);
 		} catch (IOException e) {
 			System.out.println("Couldn't read/write from the connection: " +e.toString() );
@@ -213,8 +214,8 @@ public class ClientThread extends Thread{
 		DataOutputStream dout;
 		try{
 		
-			InetAddress host = InetAddress.getLocalHost();
-			ClientSoc = new Socket(host.getHostName(), 60000);
+			//InetAddress host = InetAddress.getLocalHost();
+			ClientSoc = new Socket(Cache_host, 60000);
 			
 			din=new DataInputStream(ClientSoc.getInputStream());
 			dout=new DataOutputStream(ClientSoc.getOutputStream());
