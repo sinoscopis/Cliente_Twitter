@@ -233,7 +233,8 @@ public class ClientThread extends Thread{
 		String sSistemaOperativo = System.getProperty("os.name");
 		String file_path = null;
 		if(sSistemaOperativo.startsWith("Win")){
-			file_path = ".\\Client_Content\\"+filename;
+			file_path = "C:\\Users\\Alberto\\Desktop\\Client_Content\\"+filename;
+			//file_path = ".\\Client_Content\\"+filename;
 		}
 		else {
 			file_path = "./Client_Content/"+filename;
