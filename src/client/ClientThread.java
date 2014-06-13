@@ -20,6 +20,8 @@ public class ClientThread extends Thread{
 		BufferedReader in = null;
 		//InetAddress _host = null;
 		int client_id = 0;
+		int User_pos = ClientLauncher.usuarios_conectados;
+		ClientLauncher.usuarios_conectados=ClientLauncher.usuarios_conectados+1;
 		
 		try {
 			socket = new Socket(Server_host, 55555);
@@ -35,25 +37,20 @@ public class ClientThread extends Thread{
 				sleep(1000);
 				if (fromServer.equals("exit"))
 					break;
-				if (fromServer.startsWith("inserted,")){
+				if (fromServer.startsWith("......")){
+					fromUser = "conectUser," + ClientLauncher.cache_num;
+					if (fromUser != null) {
+						System.out.println("Client - " + fromUser);
+						synchronized (socket){
+							out.println(fromUser);
+						}
+					}
+				}
+				if (fromServer.startsWith("conectado,")){
 					String[] peticion = fromServer.split(",", 2);
 					client_id = Integer.parseInt(peticion[1]);
-				}
-				try {
-					Integer.parseInt(fromServer);
-					double randclient = Math.random();
-					double d2 = randclient * Integer.parseInt(fromServer);
-					int new_friend = (int)d2;
-					if (new_friend > 0)
-						fromUser ="insertfriendship," + client_id + "," + Integer.toString(new_friend);
-					System.out.println("Client - " + fromUser);
-					out.println(fromUser);
-					}
-				catch (Exception e){
-					//e.printStackTrace();
-				}
-				if (fromServer.startsWith("......")){
-					fromUser = "insertuser,"+randomIdentifier(15);
+					fromUser = "conectado_almacenado";
+					ClientLauncher.ClientsConectedArray[User_pos]=client_id;
 					if (fromUser != null) {
 						System.out.println("Client - " + fromUser);
 						synchronized (socket){
