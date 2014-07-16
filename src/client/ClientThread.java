@@ -17,11 +17,13 @@ public class ClientThread extends Thread{
 	public void run() {
 		Socket socket = null;
 		PrintWriter out = null;
+		String friendsByCache = "";
 		BufferedReader in = null;
 		//InetAddress _host = null;
 		int client_id = 0;
 		int User_pos = ClientLauncher.usuarios_conectados;
 		ClientLauncher.usuarios_conectados=ClientLauncher.usuarios_conectados+1;
+		
 		
 		try {
 			socket = new Socket(Server_host, 55555);
@@ -32,27 +34,39 @@ public class ClientThread extends Thread{
 			String fromServer;
 			String fromUser = null;
 			
+			
 			while ((fromServer = in.readLine()) != null) {
-				System.out.println("Server - " + fromServer);
+				//System.out.println("Server - " + fromServer);
 				sleep(1000);
 				if (fromServer.equals("exit"))
 					break;
-				if (fromServer.startsWith("......")){
-					fromUser = "conectUser," + ClientLauncher.cache_num;
+				else if (fromServer.startsWith("Conectedwith-")){
+					String[] peticion = fromServer.split("-", 2);
+					friendsByCache = peticion[1];
+					fromUser = "continua";
 					if (fromUser != null) {
-						System.out.println("Client - " + fromUser);
+						//System.out.println("Client - " + fromUser);
 						synchronized (socket){
 							out.println(fromUser);
 						}
 					}
 				}
-				if (fromServer.startsWith("conectado,")){
+				else if (fromServer.startsWith("......")){
+					fromUser = "conectUser," + ClientLauncher.cache_num;
+					if (fromUser != null) {
+						//System.out.println("Client - " + fromUser);
+						synchronized (socket){
+							out.println(fromUser);
+						}
+					}
+				}
+				else if (fromServer.startsWith("conectado,")){
 					String[] peticion = fromServer.split(",", 2);
 					client_id = Integer.parseInt(peticion[1]);
-					fromUser = "conectado_almacenado";
+					fromUser = "conectado_almacenado,"+client_id;
 					ClientLauncher.ClientsConectedArray[User_pos]=client_id;
 					if (fromUser != null) {
-						System.out.println("Client - " + fromUser);
+						//System.out.println("Client - " + fromUser);
 						synchronized (socket){
 							out.println(fromUser);
 						}
@@ -87,7 +101,7 @@ public class ClientThread extends Thread{
 				        }
 				        if (consumir!=null){
 				            synchronized (lock) {
-				            	consumirContenido(consumir);
+				            	consumirContenido(consumir,friendsByCache);
 				            }
 				        }
 				      //anado probabilidad para que lo retweetee
@@ -103,7 +117,7 @@ public class ClientThread extends Thread{
 							fromUser = "No retweeteo";
 						}
 						if (fromUser != null) {
-							System.out.println("Client - " + fromUser);
+							//System.out.println("Client - " + fromUser);
 							synchronized (socket){
 								out.println(fromUser);
 							}
@@ -157,7 +171,7 @@ public class ClientThread extends Thread{
 							}
 						}
 						if (fromUser != null) {
-							System.out.println("Client - " + fromUser);
+							//System.out.println("Client - " + fromUser);
 							synchronized (socket){
 								out.println(fromUser);
 							}
@@ -178,7 +192,7 @@ public class ClientThread extends Thread{
 						}
 						
 						if (fromUser != null) {
-							System.out.println("Client - " + fromUser);
+							//System.out.println("Client - " + fromUser);
 							out.println(fromUser);
 						}								
 					}
@@ -204,7 +218,7 @@ public class ClientThread extends Thread{
 		}
 	}
 
-	private void consumirContenido(String consumir) {
+	private void consumirContenido(String consumir, String friendsByCache) {
 		Socket ClientSoc = null;
 
 		DataInputStream din;
@@ -217,26 +231,26 @@ public class ClientThread extends Thread{
 			din=new DataInputStream(ClientSoc.getInputStream());
 			dout=new DataOutputStream(ClientSoc.getOutputStream());
 			
-			ReceiveFile(din,dout,consumir);
+			ReceiveFile(din,dout,consumir,friendsByCache);
 		}
 		catch(Exception ex){
 			
 		}
 	}
 
-	public static void ReceiveFile(DataInputStream din, DataOutputStream dout, String consumir) throws Exception{
+	public static void ReceiveFile(DataInputStream din, DataOutputStream dout, String consumir, String friendsByCache) throws Exception{
 		dout.writeUTF("GET");
 		String filename = consumir.substring(17);
 		String sSistemaOperativo = System.getProperty("os.name");
 		String file_path = null;
 		if(sSistemaOperativo.startsWith("Win")){
-			file_path = "C:\\Users\\Alberto\\Desktop\\Client_Content\\"+filename;
-			//file_path = ".\\Client_Content\\"+filename;
+			//file_path = "C:\\Users\\Alberto\\Desktop\\Client_Content\\"+filename;
+			file_path = ".\\Client_Content\\"+filename;
 		}
 		else {
 			file_path = "./Client_Content/"+filename;
 		}
-		dout.writeUTF(filename);
+		dout.writeUTF(ClientLauncher.cache_num+"/"+filename+"/"+friendsByCache);
 		String msgFromCacheServer=din.readUTF();
 		
 		if(msgFromCacheServer.compareTo("File Not Found")==0)
