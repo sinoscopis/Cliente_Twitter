@@ -37,7 +37,6 @@ public class ClientThread extends Thread{
 			
 			while ((fromServer = in.readLine()) != null) {
 				//System.out.println("Server - " + fromServer);
-				sleep(1000);
 				if (fromServer.equals("exit"))
 					break;
 				else if (fromServer.startsWith("Conectedwith-")){
@@ -205,8 +204,6 @@ public class ClientThread extends Thread{
 			System.out.println("Couldn't read/write from the connection: " +e.toString() );
 			e.printStackTrace();
 			System.exit(1);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
 		} finally { //Make sure we always clean up	
 			try {
 				out.close();
@@ -244,8 +241,8 @@ public class ClientThread extends Thread{
 		String sSistemaOperativo = System.getProperty("os.name");
 		String file_path = null;
 		if(sSistemaOperativo.startsWith("Win")){
-			//file_path = "C:\\Users\\Alberto\\Desktop\\Client_Content\\"+filename;
-			file_path = ".\\Client_Content\\"+filename;
+			file_path = "C:\\Users\\Alberto\\Desktop\\Client_Content\\"+filename;
+			//file_path = ".\\Client_Content\\"+filename;
 		}
 		else {
 			file_path = "./Client_Content/"+filename;
@@ -261,10 +258,16 @@ public class ClientThread extends Thread{
 		{
 			System.out.println("Receiving File ...");
 			File f=new File(file_path);
-			if(f.exists())
+			while(f.exists())
 			{
-				dout.flush();
-				return;					
+				if(sSistemaOperativo.startsWith("Win")){
+					file_path = "C:\\Users\\Alberto\\Desktop\\Client_Content\\"+randomIdentifier(10);
+					//file_path = ".\\Client_Content\\"+filename;
+				}
+				else {
+					file_path = "./Client_Content/"+randomIdentifier(10);
+				}
+				f=new File(file_path);
 			}
 			FileOutputStream fout=new FileOutputStream(f);
 			int ch;
