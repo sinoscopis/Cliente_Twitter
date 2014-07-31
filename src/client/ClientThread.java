@@ -240,6 +240,9 @@ public class ClientThread extends Thread{
 		String filename = consumir.substring(17);
 		String sSistemaOperativo = System.getProperty("os.name");
 		String file_path = null;
+		String[] filenamesplit = filename.split("\\.", 2);
+		String extension = filenamesplit[1];
+		String nombre =  filenamesplit[0];
 		if(sSistemaOperativo.startsWith("Win")){
 			file_path = "C:\\Users\\Alberto\\Desktop\\Client_Content\\"+filename;
 			//file_path = ".\\Client_Content\\"+filename;
@@ -261,11 +264,11 @@ public class ClientThread extends Thread{
 			while(f.exists())
 			{
 				if(sSistemaOperativo.startsWith("Win")){
-					file_path = "C:\\Users\\Alberto\\Desktop\\Client_Content\\"+randomIdentifier(10);
-					//file_path = ".\\Client_Content\\"+filename;
+					file_path = "C:\\Users\\Alberto\\Desktop\\Client_Content\\"+ nombre +"-"+randomIdentifier(10)+"."+extension;
+					//file_path = ".\\Client_Content\\"+ nombre +"-"+randomIdentifier(10)+"."+extension;
 				}
 				else {
-					file_path = "./Client_Content/"+randomIdentifier(10);
+					file_path = "./Client_Content/"+ nombre +"-"+randomIdentifier(10)+"."+extension;
 				}
 				f=new File(file_path);
 			}
