@@ -5,6 +5,7 @@ import java.net.*;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.concurrent.TimeUnit;
 
 import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
  
@@ -17,9 +18,11 @@ public class ClientThread extends Thread{
 	public void run() {
 		Socket socket = null;
 		PrintWriter out = null;
+		@SuppressWarnings("unused")
 		String friendsByCache = "";
 		BufferedReader in = null;
 		//InetAddress _host = null;
+		int posted=0;
 		int client_id = 0;
 		int User_pos = ClientLauncher.usuarios_conectados;
 		ClientLauncher.usuarios_conectados=ClientLauncher.usuarios_conectados+1;
@@ -33,7 +36,7 @@ public class ClientThread extends Thread{
  
 			String fromServer;
 			String fromUser = null;
-			
+			TimeUnit.SECONDS.sleep(40);
 			
 			while ((fromServer = in.readLine()) != null) {
 				//System.out.println("Server - " + fromServer);
@@ -80,8 +83,11 @@ public class ClientThread extends Thread{
 						//Analizo si es URL
 						String consumir=null;
 						int id_retweet=0;
+						int i = 0;
+						int num_followers_cache=0;
 				        StringTokenizer tokens2=new StringTokenizer(fromServer, "(|)");
 				        while(tokens2.hasMoreTokens()){
+				        	
 				        	String a = tokens2.nextToken();
 				            try  
 				              {  
@@ -90,6 +96,10 @@ public class ClientThread extends Thread{
 				                 }
 				                 if(Integer.parseInt(a)>0){
 				                	 id_retweet=Integer.parseInt(a);
+				                	 i=i+1;
+			                     }
+				                 if((Integer.parseInt(a)>0) && (i!=0)){
+				                	 num_followers_cache=Integer.parseInt(a);
 			                     }
 				              }  
 				            
@@ -100,7 +110,7 @@ public class ClientThread extends Thread{
 				        }
 				        if (consumir!=null){
 				            synchronized (lock) {
-				            	consumirContenido(consumir,friendsByCache);
+				            	consumirContenido(consumir,num_followers_cache);
 				            }
 				        }
 				      //anado probabilidad para que lo retweetee
@@ -110,6 +120,8 @@ public class ClientThread extends Thread{
 						if (range2>=1 && range2 <80){
 							//retweet
 							fromUser = "retweet,"+ client_id +","+id_retweet;
+							posted=posted+1;
+							System.out.println("user - " + client_id + "  posted: "+ posted );
 						}
 						else {
 							// no retweet
@@ -151,7 +163,7 @@ public class ClientThread extends Thread{
 						int range = (int)d1;
 						if (range>=1 && range <50){
 							//CONSUME el Twit
-							fromUser = "Consumo,"+twts.get(rand_tweet);
+							fromUser = "Consumo,"+twts.get(rand_tweet)+","+client_id;
 
 						}
 						else {
@@ -163,6 +175,8 @@ public class ClientThread extends Thread{
 							if (range4>=1 && range4 <20){
 								//retweet
 								fromUser = "retweet,"+ client_id +","+twts.get(rand_tweet);
+								posted=posted+1;
+								System.out.println("user - " + client_id + "  posted: "+ posted );
 							}
 							else {
 								// no retweet
@@ -185,9 +199,11 @@ public class ClientThread extends Thread{
 						}
 						else if (range>=60 && range <90){
 							fromUser ="insertrandomtweet,"+ client_id;
+							posted=posted+1;
+							System.out.println("user - " + client_id + "  posted: "+ posted );
 						}
 						else {
-							fromUser ="countusers";
+							fromUser ="continua";
 						}
 						
 						if (fromUser != null) {
@@ -204,7 +220,9 @@ public class ClientThread extends Thread{
 			System.out.println("Couldn't read/write from the connection: " +e.toString() );
 			e.printStackTrace();
 			System.exit(1);
-		} finally { //Make sure we always clean up	
+		}catch (InterruptedException e) {
+			e.printStackTrace();
+		} finally {
 			try {
 				out.close();
 				in.close();
@@ -215,7 +233,7 @@ public class ClientThread extends Thread{
 		}
 	}
 
-	private void consumirContenido(String consumir, String friendsByCache) {
+	private void consumirContenido(String consumir, int num_followers_cache) {
 		Socket ClientSoc = null;
 
 		DataInputStream din;
@@ -228,14 +246,14 @@ public class ClientThread extends Thread{
 			din=new DataInputStream(ClientSoc.getInputStream());
 			dout=new DataOutputStream(ClientSoc.getOutputStream());
 			
-			ReceiveFile(din,dout,consumir,friendsByCache);
+			ReceiveFile(din,dout,consumir,num_followers_cache);
 		}
 		catch(Exception ex){
 			
 		}
 	}
 
-	public static void ReceiveFile(DataInputStream din, DataOutputStream dout, String consumir, String friendsByCache) throws Exception{
+	public static void ReceiveFile(DataInputStream din, DataOutputStream dout, String consumir, int num_followers_cache) throws Exception{
 		dout.writeUTF("GET");
 		String filename = consumir.substring(17);
 		String sSistemaOperativo = System.getProperty("os.name");
@@ -250,7 +268,7 @@ public class ClientThread extends Thread{
 		else {
 			file_path = "./Client_Content/"+filename;
 		}
-		dout.writeUTF(ClientLauncher.cache_num+"/"+filename+"/"+friendsByCache);
+		dout.writeUTF(ClientLauncher.cache_num+"/"+filename+"/"+num_followers_cache);
 		String msgFromCacheServer=din.readUTF();
 		
 		if(msgFromCacheServer.compareTo("File Not Found")==0)

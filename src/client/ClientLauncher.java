@@ -35,7 +35,7 @@ public class ClientLauncher {
 			cliente.setName(Integer.toString(i));
 			new Thread(cliente).start();
 			ClientThreads.add((ClientThread) cliente);
-			TimeUnit.SECONDS.sleep(2);
+			TimeUnit.MILLISECONDS.sleep(100);
 		}
 	}
 }
