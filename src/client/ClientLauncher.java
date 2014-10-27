@@ -1,3 +1,13 @@
+/*
+ * Conecta el numero de clientes introducidos por argumento a la cache elegida, e inicia un hilo por cliente
+ * Argumentos:
+ * Clientes: Numero de clientes conectados
+ * Server_host: Ip del Server
+ * Cache_host: Ip de la cache
+ * cache_num: numero de la cache
+ * 
+ */
+
 package client;
 
 import java.io.*;

@@ -1,3 +1,7 @@
+/*
+ * Hilo de cliente que realiza toda la actividad de la red social
+ */
+
 package client;
 
 import java.io.*;
@@ -7,7 +11,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.TimeUnit;
 
-import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
+//import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
  
 public class ClientThread extends Thread{
 
@@ -22,7 +26,6 @@ public class ClientThread extends Thread{
 		String friendsByCache = "";
 		BufferedReader in = null;
 		//InetAddress _host = null;
-		int posted=0;
 		int client_id = 0;
 		int User_pos = ClientLauncher.usuarios_conectados;
 		ClientLauncher.usuarios_conectados=ClientLauncher.usuarios_conectados+1;
@@ -120,8 +123,8 @@ public class ClientThread extends Thread{
 						if (range2>=1 && range2 <80){
 							//retweet
 							fromUser = "retweet,"+ client_id +","+id_retweet;
-							posted=posted+1;
-							System.out.println("user - " + client_id + "  posted: "+ posted );
+							/*posted=posted+1;
+							System.out.println("user - " + client_id + "  posted: "+ posted );*/
 						}
 						else {
 							// no retweet
@@ -134,7 +137,7 @@ public class ClientThread extends Thread{
 							}
 						}
 					}
-					else if (fromServer.startsWith("Tweets [")){
+					/*else if (fromServer.startsWith("Tweets [")){
 						Hashtable twts=new Hashtable();
 			            StringTokenizer tokens=new StringTokenizer(fromServer, "(|)");
 			            int i=0;
@@ -164,7 +167,6 @@ public class ClientThread extends Thread{
 						if (range>=1 && range <50){
 							//CONSUME el Twit
 							fromUser = "Consumo,"+twts.get(rand_tweet)+","+client_id;
-
 						}
 						else {
 							//No consume el twit
@@ -189,8 +191,9 @@ public class ClientThread extends Thread{
 								out.println(fromUser);
 							}
 						}
-					}
+					}*/
 					else {
+						//TimeUnit.SECONDS.sleep(1);
 						double randNumber = Math.random();
 						double d1 = randNumber * 100;
 						int range = (int)d1;
@@ -199,8 +202,8 @@ public class ClientThread extends Thread{
 						}
 						else if (range>=60 && range <90){
 							fromUser ="insertrandomtweet,"+ client_id;
-							posted=posted+1;
-							System.out.println("user - " + client_id + "  posted: "+ posted );
+							/*posted=posted+1;
+							System.out.println("user - " + client_id + "  posted: "+ posted );*/
 						}
 						else {
 							fromUser ="continua";
